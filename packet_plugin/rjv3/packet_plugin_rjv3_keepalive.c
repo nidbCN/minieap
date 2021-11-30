@@ -36,7 +36,7 @@ void rjv3_keepalive_reset() {
 static RESULT send_echo_frame(struct _packet_plugin* this, uint8_t* content, int len) {
     PACKET_BUILDER* _builder = packet_builder_get();
     if (_builder == NULL) {
-        PR_ERR("包生成器未初始化");
+        PR_ERR("Package generater not init");
         goto fail;
     }
 
@@ -44,12 +44,12 @@ static RESULT send_echo_frame(struct _packet_plugin* this, uint8_t* content, int
     uint8_t _src[6] = {0};
     char _ifname[IFNAMSIZ] = {0};
     if (_if == NULL) {
-        PR_ERR("网络界面未初始化");
+        PR_ERR("Network interface not init");
         goto fail;
     }
 
     if (IS_FAIL(_if->get_ifname(_if, _ifname, IFNAMSIZ)) || IS_FAIL(obtain_iface_mac(_ifname, _src))) {
-        PR_ERR("无法获取源 MAC");
+        PR_ERR("Cannot get source MAC");
         goto fail;
     }
 
@@ -62,7 +62,7 @@ static RESULT send_echo_frame(struct _packet_plugin* this, uint8_t* content, int
 
     ETH_EAP_FRAME frame;
     if ((frame.content = (uint8_t*)malloc(100)) == NULL) {
-        PR_ERR("无法为 Keep-Alive 报文分配内存空间");
+        PR_ERR("Cannot alloc memory for Keep-Alive message");
         goto fail;
     }
     memset(frame.content, 0, 100);
@@ -81,7 +81,7 @@ static RESULT send_echo_frame(struct _packet_plugin* this, uint8_t* content, int
     free(frame.content);
     return SUCCESS;
 fail:
-    PR_ERR("无法发送 Keep-Alive 报文");
+    PR_ERR("Cannot send Keep-Alive message");
     free(frame.content);
     return FAILURE;
 }
@@ -111,7 +111,7 @@ RESULT rjv3_send_new_keepalive_frame(struct _packet_plugin* this) {
 void rjv3_send_keepalive_timed(void* vthis) {
     PACKET_PLUGIN* this = (PACKET_PLUGIN*)vthis;
     if (IS_FAIL(rjv3_send_new_keepalive_frame(this))) {
-        PR_ERR("心跳包发送失败");
+        PR_ERR("Heartbeat package send failed");
     }
     g_keepalive_alarm_id = schedule_alarm(PRIV->heartbeat_interval, rjv3_send_keepalive_timed, vthis);
 }

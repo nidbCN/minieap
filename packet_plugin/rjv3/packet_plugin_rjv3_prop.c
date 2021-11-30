@@ -13,7 +13,7 @@
 RJ_PROP* new_rjv3_prop() {
     RJ_PROP* _prop = (RJ_PROP*)malloc(sizeof(RJ_PROP));
     if (_prop == NULL) {
-        PR_ERRNO("RJv3 字段结构内存分配失败");
+        PR_ERRNO("Alloc memory for RJv3 field struct failed");
         return NULL;
     }
 
@@ -101,12 +101,12 @@ int append_rjv3_prop_to_buffer(RJ_PROP* prop, uint8_t* buf, int buflen) {
     int _full_len = sizeof(RJ_PROP_HEADER1)+ sizeof(RJ_PROP_HEADER2) + _content_len;
 
     if (buflen < _full_len) {
-        PR_ERR("缓冲空间不足，无法追加字段");
+        PR_ERR("No buffer left, cannot append field 缓冲空间不足，无法追加字段");
         return -1;
     }
 
     if (prop->header1.header_type != 0x1a) {
-        PR_WARN("不支持写入 header_type 为 %hhu 的字段", prop->header1.header_type);
+        PR_WARN("Field with header_type %hhu is not supported", prop->header1.header_type);
         return 0;
     }
     memmove(buf, &prop->header1, sizeof(RJ_PROP_HEADER1));
@@ -145,7 +145,7 @@ void append_rjv3_prop_to_frame(RJ_PROP* prop, ETH_EAP_FRAME* frame) {
         /* Container prop, see `rjv3_prepare_frame` */
         _content_len = prop->header2.len + (prop->header2.type << 8);
     } else {
-        PR_WARN("不支持写入 header_type 为 %hhu 的字段", prop->header1.header_type);
+        PR_WARN("Field with header_type %hhu is not supported", prop->header1.header_type);
         return;
     }
 

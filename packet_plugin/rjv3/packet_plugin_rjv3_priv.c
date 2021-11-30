@@ -121,7 +121,7 @@ static void rjv3_set_secondary_dns(char* dns_ascii_buf, char* fake_dns) {
     if (dns_list && dns_list->next) {
         strncpy(dns_ascii_buf, dns_list->next->content, INET6_ADDRSTRLEN);
     } else {
-        PR_WARN("第二 DNS 地址获取错误。若认证失败，请用 --fake-dns2 指定第二 DNS 地址")
+        PR_WARN("Cannot get second DNS address. Use --fake-dns2 to specify second DNS address.")
     }
     free_dns_list(&dns_list);
     return;
@@ -190,7 +190,7 @@ static RESULT rjv3_get_dhcp_lease(struct _packet_plugin* this, DHCP_LEASE* lease
     if (_if == NULL) return FAILURE;
     char _ifname[IFNAMSIZ] = {0};
     if (IS_FAIL(_if->get_ifname(_if, _ifname, IFNAMSIZ))) {
-        PR_ERR("网络界面尚未配置");
+        PR_ERR("Network interface havenot configured.");
         return FAILURE;
     }
 
@@ -200,14 +200,14 @@ static RESULT rjv3_get_dhcp_lease(struct _packet_plugin* this, DHCP_LEASE* lease
     if (IS_FAIL(obtain_iface_ip_mask(_ifname, &_ip_list))
             || (_ipv4 = find_ip_with_family(_ip_list, AF_INET)) == NULL) {
 
-        PR_ERR("IPv4 地址获取错误");
+        PR_ERR("An error occurred when getting IPv4 address");
         goto fail;
     }
 
     IP_ADDR _gw;
     _gw.family = AF_INET;
     if (IS_FAIL(obtain_iface_ipv4_gateway(_ifname, _gw.ip))) {
-        PR_ERR("IPv4 网关获取错误");
+        PR_ERR("An error occurred when getting IPv4 gateway");
         goto fail;
     }
 
@@ -216,7 +216,7 @@ static RESULT rjv3_get_dhcp_lease(struct _packet_plugin* this, DHCP_LEASE* lease
     _dns1.family = AF_INET;
     if (!PRIV->fake_dns1) {
         if (IS_FAIL(obtain_dns_list(&_dns_list))) {
-            PR_ERR("主 DNS 地址获取错误，请使用 --fake-dns1 选项手动指定主 DNS 地址");
+            PR_ERR("Get main DNS failed, use --fake-dns1 option to specify main DNS address");
             goto fail;
         }
         _dns1_str = _dns_list->content;
@@ -224,7 +224,7 @@ static RESULT rjv3_get_dhcp_lease(struct _packet_plugin* this, DHCP_LEASE* lease
         _dns1_str = PRIV->fake_dns1;
     }
     if (inet_pton(AF_INET, _dns1_str, &_dns1.ip) == 0) {
-            PR_ERR("主 DNS 地址格式错误，要求 IPv4 地址。请使用 --fake-dns1 选项手动指定主 DNS 地址");
+            PR_ERR("Get main DNS failed, IPv4 is required. Use --fake-dns1 option to specify main DNS address");
             goto fail;
     }
 
@@ -458,7 +458,7 @@ RESULT rjv3_process_result_prop(ETH_EAP_FRAME* frame) {
         int _content_len = _msg->header2.len - HEADER2_SIZE_NO_MAGIC(_msg);
 
         if (_content_len != 0) {
-            PR_INFO("服务器通知：\n");
+            PR_INFO("Server message:\n");
             pr_info_gbk((char*)_msg->content, _content_len);
         }
     }
@@ -469,7 +469,7 @@ RESULT rjv3_process_result_prop(ETH_EAP_FRAME* frame) {
             int _content_len = _msg->header2.len - HEADER2_SIZE_NO_MAGIC(_msg);
 
             if (_content_len != 0) {
-                PR_INFO("计费通知：\n");
+                PR_INFO("Charge message:\n");
                 pr_info_gbk((char*)_msg->content, _content_len);
             }
         }
@@ -477,7 +477,7 @@ RESULT rjv3_process_result_prop(ETH_EAP_FRAME* frame) {
         _msg = NULL;
         _msg = (RJ_PROP*)lookup_data(_srv_msg, NULL, rjv3_is_echokey_prop);
         if (_msg == NULL) {
-            PR_ERR("无法找到 echo key 的位置，将不能进行心跳");
+            PR_ERR("Cannot found echo key location, disable heartbeat");
             return FAILURE;
         } else {
             uint32_t _echokey = 0;
@@ -507,14 +507,14 @@ void rjv3_start_secondary_auth(void* vthis) {
             rjv3_process_result_prop(PRIV->last_recv_packet); // Loads of texts
             free_frame(&PRIV->last_recv_packet); // Duplicated in process_success
             schedule_alarm(1, rjv3_send_keepalive_timed, this);
-            PR_ERR("无法获取 IPv4 地址等信息，将不会进行第二次认证而直接开始心跳");
+            PR_ERR("Cannot get infomation such as IPv4 address etc. Heartbeat without second auth");
         } else {
-            PR_WARN("DHCP 可能尚未完成，将继续等待……");
+            PR_WARN("DHCP not complete, please wait...");
             schedule_alarm(5, rjv3_start_secondary_auth, this);
         }
         return;
     } else {
-        PR_INFO("DHCP 完成，正在开始第二次认证");
+        PR_INFO("DHCP success, start second authenction");
         free_frame(&PRIV->last_recv_packet); // Duplicated in process_success
         switch_to_state(EAP_STATE_START_SENT, NULL);
         return;

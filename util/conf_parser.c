@@ -62,7 +62,7 @@ RESULT conf_parser_add_value(const char* key, const char* value) {
 
 	CONFIG_PAIR* pair = (CONFIG_PAIR*)malloc(sizeof(CONFIG_PAIR));
 	if (pair == NULL) {
-		PR_ERRNO("无法为新的配置项分配内存空间");
+		PR_ERRNO("Cannot alloc memory for new config");
 		return FAILURE;
 	}
 	pair->key = strdup(key);
@@ -79,7 +79,7 @@ RESULT conf_parser_parse_now() {
 
 	FILE* fp = fopen(g_conf_file, "r");
 	if (fp == NULL) {
-		PR_ERRNO("无法打开配置文件");
+		PR_ERRNO("Cannot open config file");
 		return FAILURE;
 	}
 
@@ -101,7 +101,7 @@ RESULT conf_parser_parse_now() {
 				return FAILURE;
 			}
 		} else {
-			PR_WARN("配置文件行格式错误：%s", line_buf);
+			PR_WARN("Format error in config file, line: %s", line_buf);
 		}
 	}
 
@@ -161,7 +161,7 @@ RESULT conf_parser_save_file() {
 
 	FILE* fp = fopen(g_conf_file, "w");
 	if (fp == NULL) {
-		PR_ERRNO("无法打开配置文件");
+		PR_ERRNO("Cannot open config file");
 		return FAILURE;
 	}
 

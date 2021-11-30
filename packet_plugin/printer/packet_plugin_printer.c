@@ -21,7 +21,7 @@ void printer_destroy(struct _packet_plugin* this) {
 PACKET_PLUGIN* packet_plugin_printer_new() {
     PACKET_PLUGIN* this = (PACKET_PLUGIN*)malloc(sizeof(PACKET_PLUGIN));
     if (this == NULL) {
-        PR_ERRNO("Printer 插件主结构内存分配失败");
+        PR_ERRNO("Failed alloc memory for Printer plugin main struct");
         return NULL;
     }
     memset(this, 0, sizeof(PACKET_PLUGIN));
@@ -29,7 +29,7 @@ PACKET_PLUGIN* packet_plugin_printer_new() {
     this->priv = NULL;
 
     this->name = "printer";
-    this->description = "将流经此插件的数据包内容打印出来";
+    this->description = "Print packages content";
     this->prepare_frame = printer_prepare_frame;
     this->on_frame_received = printer_on_frame_received;
     this->destroy = printer_destroy;

@@ -30,16 +30,16 @@ static int init_program_config(int argc, char* argv[]) {
 
     load_default_params();
     if (IS_FAIL(parse_cmdline_conf_file(argc, argv))) {
-        PR_ERR("配置文件路径解析出错");
+        PR_ERR("An error occurred when parse config file path");
         goto err;
     }
 
     cfg = get_program_config();
     if (IS_FAIL(parse_config_file(cfg->conffile))) {
-        PR_WARN("配置文件解析出错，请注意命令行参数是否完整");
+        PR_WARN("Can not parse config file, please check your command");
     }
     if (IS_FAIL(parse_cmdline_opts(argc, argv))) {
-        PR_ERR("命令行参数解析出错");
+        PR_ERR("An error occurred when parse command line arguments");
         goto err;
     }
 
@@ -57,11 +57,11 @@ static int init_plugin_config(int argc, char* argv[]) {
 
     packet_plugin_load_default_params();
     if (IS_FAIL(packet_plugin_process_config_file(cfg->conffile))) {
-        PR_ERR("插件配置文件内容解析出错");
+        PR_ERR("An error occurred when parse config file of plugin");
         goto err;
     }
     if (IS_FAIL(packet_plugin_process_cmdline_opts(argc, argv))) {
-        PR_ERR("插件命令行参数解析出错");
+        PR_ERR("An error occurred when parse command line arguments of plugin");
         goto err;
     }
     return packet_plugin_validate_params();
@@ -71,7 +71,7 @@ err:
 
 static void packet_plugin_list_select(void* name, void* unused) {
     if (IS_FAIL(select_packet_plugin((const char*)name))) {
-        PR_WARN("%s 插件未找到，请检查插件名称是否拼写正确", name);
+        PR_WARN("Plugin %s not found, please check", name);
     }
 }
 
@@ -91,22 +91,24 @@ static int init_cfg(int argc, char* argv[]) {
     PR_RAW("MiniEAP " VERSION "\n"
            "Hamster Tian, 2016\n\n");
 
+    PR_RAW("Traslated by Gaein nidb");
+
     if (IS_FAIL(init_program_config(argc, argv))) {
-        PR_ERR("参数初始化错误");
+        PR_ERR("Program init failed");
         return FAILURE;
     }
 
     list_traverse(cfg->packet_plugin_list, packet_plugin_list_select, NULL);
 
     if (IS_FAIL(select_if_impl(cfg->if_impl))) {
-        PR_ERR("网络驱动插件启用失败，请检查插件名称是否拼写正确");
+        PR_ERR("Network plugin start failed, please check name spell");
         return FAILURE;
     }
 
     packet_plugin_print_banner();
 
     if (IS_FAIL(init_plugin_config(argc, argv))) {
-        PR_ERR("插件初始化错误");
+        PR_ERR("Plugin init failed");
         return FAILURE;
     }
 
@@ -130,17 +132,17 @@ static int init_if() {
 
     if_impl = get_if_impl();
     if (IS_FAIL(if_impl->set_ifname(if_impl,cfg->ifname))) {
-        PR_ERR("设置接口名称失败");
+        PR_ERR("Setup interface name failed");
         return FAILURE;
     }
 
     if (IS_FAIL(if_impl->setup_capture_params(if_impl, ETH_P_PAE, FALSE))) {
-        PR_ERR("设置捕获参数失败");
+        PR_ERR("Setup capture params failed");
         return FAILURE;
     }
 
     if (IS_FAIL(if_impl->prepare_interface(if_impl))) {
-        PR_ERR("捕获准备失败");
+        PR_ERR("Prepare interface failed");
         return FAILURE;
     }
 
@@ -153,9 +155,9 @@ static void apply_log_daemon_params() {
     PROG_CONFIG* cfg = get_program_config();
 
     if (cfg->daemon_type != DAEMON_FOREGROUND) {
-        PR_INFO("正在转入后台运行……");
+        PR_INFO("Try running background...");
         if (IS_FAIL(go_background())) {
-            PR_WARN("无法转入后台运行");
+            PR_WARN("Can not running background");
         }
     }
 
@@ -171,7 +173,7 @@ static void exit_handler() {
     sched_alarm_destroy();
     pid_lock_destroy();
     free_config();
-    PR_INFO("MiniEAP 已退出");
+    PR_INFO("MiniEAP Exited");
     close_log();
 }
 

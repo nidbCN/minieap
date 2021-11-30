@@ -6,7 +6,6 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <net/if.h>
-
 #include "config.h"
 #include "logging.h"
 #include "misc.h"
@@ -62,7 +61,7 @@ RESULT parse_cmdline_conf_file(int argc, char* argv[]) {
     for (; i < argc; ++i) {
         if (strcmp(argv[i], "--conf-file") == 0) {
             if (i + 1 >= argc) {
-                PR_ERR("--conf-file必须有一个参数");
+                PR_ERR("--conf-file must have a argument");
                 return FAILURE;
             } else {
                 int _len = strnlen(argv[i + 1], MAX_PATH);
@@ -81,39 +80,39 @@ RESULT parse_cmdline_conf_file(int argc, char* argv[]) {
 #define _STR(x) #x
 #define STR(x) _STR(x)
 static void print_cmdline_help() {
-    PR_RAW("这是一个允许私有扩展的 802.1x 客户端，可通过插件实现私有部分的认证。\n");
-    PR_RAW("\n以下选项中，[]表示可选参数，<>表示必选参数。\n\n");
+    PR_RAW("This is a private extensible 802.1x client, auth ptrivate part by plugin.\n");
+    PR_RAW("\n [] means optional parameter, <> means necessary parameter.\n\n");
     PR_RAW(
-        "\t--help, -h\t显示本帮助\n"
-        "\t--kill, -k [1]\t终止其他实例并退出。加任意非 0 参数表示终止其他实例后继续进行认证\n"
-        "\t--save, -w\t保存本次认证所用参数\n"
-        "\t--username, -u <...>\t用户名\n"
-        "\t--password, -p <...>\t密码\n"
-        "\t--nic, -n <...>\t\t要使用的网络界面名\n"
-        "\t--stage-timeout, -t <num>\t单个认证阶段的超时时间 [默认" STR(DEFAULT_STAGE_TIMEOUT) "]\n"
-        "\t--wait-after-fail, -r <num>\t认证失败后重新认证前的等待时间（但当服务器要求重新认证时将直接开始认证）[默认" STR(DEFAULT_WAIT_AFTER_FAIL_SECS) "]\n"
-        "\t--max-fail, -l <num>\t最大允许认证失败次数 [默认" STR(DEFAULT_MAX_FAILURES) "]\n"
-        "\t--no-auto-reauth, -x\t认证掉线后不允许自动重连 [默认" STR(DEFAULT_RESTART_ON_LOGOFF) "]\n"
-        "\t--daemonize, -b <0-3>\t后台运行方式： [默认0]\n"
-            "\t\t\t\t0 = 不后台\n"
-            "\t\t\t\t1 = 后台运行，关闭输出\n"
-            "\t\t\t\t2 = 后台运行，输出到当前控制台\n"
-            "\t\t\t\t3 = 后台运行，输出到日志文件\n"
-        "\t--proxy-lan-iface, -z <...>\t代理认证时的 LAN 网络界面名 [默认无]\n"
-        "\t--auth-round, -j <num>\t需要认证的次数 [默认1]\n"
-        "\t--max-retries <num>\t最大超时重试的次数 [默认3]\n"
-        "\t--pid-file <...>\tPID 文件路径，设为none可禁用 [默认" DEFAULT_PIDFILE "]\n"
-        "\t--conf-file <...>\t配置文件路径 [默认" DEFAULT_CONFFILE "]\n"
-        "\t--if-impl <...>\t\t选择此网络操作模块，仅允许选择一次 [默认为第一个可用的模块]\n"
-        "\t--pkt-plugin <...>\t启用此名称的数据包修改器，可启用多次、多个 [默认无]\n"
-        "\t--module <...>\t\t同上\n"
-            "\t\t\t\t当命令行选项中存在 --module 或 --pkt-plugin 时，配置文件中的所有 module= 行都将被忽略\n"
+        "\t--help, -h\tShow help\n"
+        "\t--kill, -k [1]\tTerminate others processes and exit. Continue authenticate with non-0 parameter.\n"
+        "\t--save, -w\tSave parameters\n"
+        "\t--username, -u <...>\tUsername\n"
+        "\t--password, -p <...>\tPassword\n"
+        "\t--nic, -n <...>\t\tNetwork interface name\n"
+        "\t--stage-timeout, -t <num>\tTimed-out time for a stage [Default " STR(DEFAULT_STAGE_TIMEOUT) "]\n"
+        "\t--wait-after-fail, -r <num>\tWait time after authenticate failed (Start straight when server required) [Default " STR(DEFAULT_WAIT_AFTER_FAIL_SECS) "]\n"
+        "\t--max-fail, -l <num>\tMax failures [Default " STR(DEFAULT_MAX_FAILURES) "]\n"
+        "\t--no-auto-reauth, -x\tNo re-auth after offline [Default " STR(DEFAULT_RESTART_ON_LOGOFF) "]\n"
+        "\t--daemonize, -b <0-3>\tBackground running: [Default 0]\n"
+            "\t\t\t\t0 = No background\n"
+            "\t\t\t\t1 = Run background, without output\n"
+            "\t\t\t\t2 = Run background，output to this console\n"
+            "\t\t\t\t3 = Run background，output to log file\n"
+        "\t--proxy-lan-iface, -z <...>\tLAN interface when use proxy auth [Default no-value]\n"
+        "\t--auth-round, -j <num>\tNumber of authentication needed [Default 1]\n"
+        "\t--max-retries <num>\tMax retry when timed-out [Default 3]\n"
+        "\t--pid-file <...>\tPath to PID file, set none to disable [Default" DEFAULT_PIDFILE "]\n"
+        "\t--conf-file <...>\tPath to config file [Default" DEFAULT_CONFFILE "]\n"
+        "\t--if-impl <...>\t\tChoose a network module for this operation, only can select once [Default First available module]\n"
+        "\t--pkt-plugin <...>\tEnable package modifier by name, can enable multiple [Default no-value]\n"
+        "\t--module <...>\t\tSame as --pkt-plugin\n"
+            "\t\t\t\tWhen --module or --pkt-plugin exists in parameters, all module= will be ignored.\n"
     );
 
     print_if_impl_list();
     packet_plugin_print_cmdline_help();
 
-    PR_RAW("\n\033[1m注意：选项与参数之间必须用空格分开！\033[0m\n");
+    PR_RAW("\n\033[1mATTENTION: OPTIONS AND PARAMETER MUST BE SPLITTED BY BLANK!\033[0m\n");
 
     _exit(EXIT_SUCCESS);
 }
@@ -201,7 +200,7 @@ RESULT parse_cmdline_opts(int argc, char* argv[]) {
     while (opt != -1) {
         switch (opt) {
             case ':':
-                PR_ERR("缺少参数：%s", argv[optind - 1]);
+                PR_ERR("Require argument: %s", argv[optind - 1]);
                 return FAILURE;
                 break;
             case 0:
@@ -281,11 +280,11 @@ RESULT validate_params() {
         return FAILURE; \
     }
 
-    ASSERT_NOTIFY(!g_proxy_config.proxy_on && !g_eap_config.username, "用户名不能为空");
-    ASSERT_NOTIFY(!g_proxy_config.proxy_on && !g_eap_config.password, "密码不能为空");
+    ASSERT_NOTIFY(!g_proxy_config.proxy_on && !g_eap_config.username, "Username must have value");
+    ASSERT_NOTIFY(!g_proxy_config.proxy_on && !g_eap_config.password, "Password must have value");
     ASSERT_NOTIFY(g_proxy_config.proxy_on && !g_proxy_config.lan_ifname,
-                        "代理认证开启时，LAN 侧网卡名不能为空");
-    ASSERT_NOTIFY(!g_prog_config.ifname, "网卡名不能为空");
+                        "When proxy enable, interface name of LAN must have value");
+    ASSERT_NOTIFY(!g_prog_config.ifname, "Interface name must have value");
     return SUCCESS;
 }
 
