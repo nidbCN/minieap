@@ -41,14 +41,14 @@ RESULT sockraw_set_ifname(struct _if_impl* this, const char* ifname) {
     int _tmpsockfd = 0;
 
     if ((_tmpsockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-        PR_ERRNO("套接字打开失败");
+        PR_ERRNO("Failed open socket");
         return FAILURE;
     }
 
     memset(&ifreq, 0, sizeof(struct ifreq));
     strncpy(ifreq.ifr_name, ifname, IFNAMSIZ);
     if (ioctl(_tmpsockfd, SIOCGIFINDEX, &ifreq) < 0) {
-        PR_ERRNO("网络界面 ID 获取失败");
+        PR_ERRNO("Failed get network interface ID");
         return FAILURE;
     }
     PRIV->if_index = ifreq.ifr_ifindex;
@@ -77,7 +77,7 @@ RESULT sockraw_prepare_interface(struct _if_impl* this) {
     struct ifreq ifreq;
 
     if ((PRIV->sockfd = socket(AF_PACKET, SOCK_RAW, htons(PRIV->proto))) < 0) {
-        PR_ERRNO("套接字打开失败");
+        PR_ERRNO("Failed open socket");
         return FAILURE;
     }
     sockraw_bind_to_if(this, PRIV->proto);
@@ -87,7 +87,7 @@ RESULT sockraw_prepare_interface(struct _if_impl* this) {
     strncpy(ifreq.ifr_name, PRIV->ifname, IFNAMSIZ);
 
     if (ioctl(PRIV->sockfd, SIOCGIFFLAGS, &ifreq) < 0) {
-        PR_ERRNO("获取网络界面标志信息失败");
+        PR_ERRNO("Failed get network interface infomation");
         return FAILURE;
     }
 
@@ -143,7 +143,7 @@ RESULT sockraw_send_frame(struct _if_impl* this, ETH_EAP_FRAME* frame) {
     int ret = sendto(PRIV->sockfd, frame->content, frame->actual_len, 0,
                 (struct sockaddr*)&socket_address, sizeof(struct sockaddr_ll));
     if (ret < 0) {
-        PR_ERRNO("sendto 调用失败");
+        PR_ERRNO("Execute sendto failed");
         return FAILURE;
     } else {
         return SUCCESS;
@@ -164,7 +164,7 @@ void sockraw_destroy(IF_IMPL* this) {
 IF_IMPL* sockraw_new() {
     IF_IMPL* this = (IF_IMPL*)malloc(sizeof(IF_IMPL));
     if (this == NULL) {
-        PR_ERRNO("SOCK_RAW 主结构内存分配失败");
+        PR_ERRNO("Cannot alloc memory for SOCK_RAW main struct");
         return NULL;
     }
     memset(this, 0, sizeof(IF_IMPL));
@@ -172,7 +172,7 @@ IF_IMPL* sockraw_new() {
     /* The priv pointer in if_impl.h is a sockraw_priv* here */
     this->priv = (sockraw_priv*)malloc(sizeof(sockraw_priv));
     if (this->priv == NULL) {
-        PR_ERRNO("SOCK_RAW 私有结构内存分配失败");
+        PR_ERRNO("Cannot alloc memory for SOCK_RAW private struct");
         free(this);
         return NULL;
     }
@@ -188,7 +188,7 @@ IF_IMPL* sockraw_new() {
     this->send_frame = sockraw_send_frame;
     this->set_frame_handler = sockraw_set_frame_handler;
     this->name = "sockraw";
-    this->description = "采用RAW Socket进行通信的轻量网络接口模块";
+    this->description = "A light network interface module use RAW Socket to communicate";
     return this;
 }
 IF_IMPL_INIT(sockraw_new)
