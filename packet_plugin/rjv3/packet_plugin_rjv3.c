@@ -50,7 +50,7 @@ static RESULT append_rj_cmdline_opt(struct _packet_plugin* this, const char* opt
     char* _split;
 
     if (_arg == NULL) {
-        PR_ERRNO("无法为命令行的 --rj-option 参数分配内存空间");
+        PR_ERRNO("Cannot alloc memory for parameter --rj-option");
         return FAILURE;
     }
 
@@ -88,7 +88,7 @@ static RESULT append_rj_cmdline_opt(struct _packet_plugin* this, const char* opt
     return SUCCESS;
 
 malformat:
-    PR_ERR("--rj-option 的参数格式错误：%s", opt);
+    PR_ERR("Error format in --rj-option：%s", opt);
 fail:
     free(_arg);
     return FAILURE;
@@ -98,27 +98,27 @@ fail:
 #define STR(x) _STR(x)
 void rjv3_print_cmdline_help(struct _packet_plugin* this) {
     PR_RAW(
-        "\t--heartbeat, -e <num>\t\t心跳间隔秒数 [默认" STR(DEFAULT_HEARTBEAT_INTERVAL) "]\n"
-        "\t--eap-bcast-addr, -a <0-1>\tStart 包广播地址： [默认" STR(DEFAULT_EAP_BCAST_ADDR) "]\n"
-            "\t\t\t\t\t0 = 标准地址\n"
-            "\t\t\t\t\t1 = 锐捷私有地址\n"
-        "\t--dhcp-type, -d <0-3>\t\tDHCP 方式： [默认" STR(DEFAULT_DHCP_TYPE) "]\n"
-            "\t\t\t\t\t0 = 不使用 DHCP\n"
-            "\t\t\t\t\t1 = 二次认证\n"
-            "\t\t\t\t\t2 = 认证后 DHCP\n"
-            "\t\t\t\t\t3 = 认证前 DHCP\n"
-        "\t--dhcp-script, -c <...>\t\t二次认证之间及认证完成后运行此命令 [默认无]\n"
-        "\t--rj-option <type>:<value>[:r]\t自定义认证字段，其中 type 和 value 必须为十六进制串\n"
-            "\t\t\t\t\t如 --rj-option 6a:000102 表示新增一条类型为 0x6a、内容为 0x00 0x01 0x02的字段\n"
-            "\t\t\t\t\t:r 表示替换内置生成的字段，如 --rj-option 6f:000102:r 表示将内置算法生成的类型为 0x6f 的字段内容替换为 0x00 0x12 0x02\n"
-            "\t\t\t\t\t当命令行与配置文件中同时存在此选项时，两处的选项都将发挥作用。若认证失败，请检查配置文件中是否有错误的参数\n"
-        "\t--service <str>\t\t\t自定义服务名 [默认" DEFAULT_SERVICE_NAME "]\n"
-        "\t--version-str <str>\t\t自定义版本字符串 [默认" DEFAULT_VER_STR "]\n"
-        "\t--fake-dns1 <str>\t\t自定义主 DNS 地址（点分十进制 IPv4 格式） [默认自动获取]\n"
-        "\t--fake-dns2 <str>\t\t自定义次 DNS 地址（IPv4 / IPv6 不限） [默认自动获取]\n"
-        "\t--fake-serial <str>\t\t自定义硬盘序列号 [默认自动获取]\n"
-        "\t--max-dhcp-count <num>\t\t二次认证时等待 DHCP 结果的允许超时次数 [默认" STR(DEFAULT_MAX_DHCP_COUNT) "]\n"
-        "\t从 --service 到 --fake-serial（除 --fake-dns1）都是对应的 --rj-option 的简单形式，可直接使用 ASCII 字符串作为参数，不需转化为十六进制表示\n"
+        "\t--heartbeat, -e <num>\t\tHeartbeat Heartbeat interval in seconds [Default " STR(DEFAULT_HEARTBEAT_INTERVAL) "]\n"
+        "\t--eap-bcast-addr, -a <0-1>\tStart package boardcast address: [Default " STR(DEFAULT_EAP_BCAST_ADDR) "]\n"
+            "\t\t\t\t\t0 = Standard address\n"
+            "\t\t\t\t\t1 = RuiJie privarte address\n"
+        "\t--dhcp-type, -d <0-3>\t\tDHCP method: [Default " STR(DEFAULT_DHCP_TYPE) "]\n"
+            "\t\t\t\t\t0 = Disable DHCP\n"
+            "\t\t\t\t\t1 = DHCP twice\n"
+            "\t\t\t\t\t2 = DHCP after auth\n"
+            "\t\t\t\t\t3 = DHCP before auth\n"
+        "\t--dhcp-script, -c <...>\t\tRun this command between second auth and auth complete [Default no-value]\n"
+        "\t--rj-option <type>:<value>[:r]\tCustomed auth field, type and value must be hex\n"
+            "\t\t\t\t\tsuch as --rj-option 6a:000102 represent add a field with type 0x6a and content 0x00 0x01 0x02\n"
+            "\t\t\t\t\t:r represent replace inner field, such as --rj-option 6f:000102:r represent replace content of type 0x6f to 0x00 0x12 0x02 in field\n"
+            "\t\t\t\t\twhen this option exits in command line and config file at same time, they will all be applied. Check config file if auth field\n"
+        "\t--service <str>\t\t\tCustomed service name [Default " DEFAULT_SERVICE_NAME "]\n"
+        "\t--version-str <str>\t\tCustomed version string [Default " DEFAULT_VER_STR "]\n"
+        "\t--fake-dns1 <str>\t\tCustomed main DNS Address (点分十进制 IPv4 格式） [Default auto]\n"
+        "\t--fake-dns2 <str>\t\tCustomed second DNS Address ( IPv4 / IPv6 ) [Default auto]\n"
+        "\t--fake-serial <str>\t\tCustomed storage device id [Default auto]\n"
+        "\t--max-dhcp-count <num>\t\t Max timed-out number for wait DHCP result when second auth [Default " STR(DEFAULT_MAX_DHCP_COUNT) "]\n"
+        "\tfrom --service to --fake-serial（except --fake-dns1）all simple mode as same as --rj-option , directly use ASCII string as parameter\n"
         );
 }
 
@@ -141,7 +141,7 @@ static RESULT rjv3_parse_one_opt(struct _packet_plugin* this, const char* option
     if (ISOPT("heartbeat")) {
         PRIV->heartbeat_interval = atoi(argument);
         if (PRIV->heartbeat_interval == 0) {
-            PR_WARN("心跳间隔指定为 0，这将会禁止心跳！请确认参数格式正确。");
+            PR_WARN("Heartbeat interval is 0, this will disable, check paramters");
         }
     } else if (ISOPT("eap-bcast-addr")) {
         PRIV->bcast_addr = atoi(argument) % 2; /* 一共2个选项 */ // Do not allow CER
@@ -193,7 +193,7 @@ RESULT rjv3_process_cmdline_opts(struct _packet_plugin* this, int argc, char* ar
     while (opt != -1) {
         switch (opt) {
             case ':':
-                PR_ERR("缺少参数：%s", argv[optind - 1]);
+                PR_ERR("Require parameter: %s", argv[optind - 1]);
                 return FAILURE;
             default:
                 if (opt > 0) {
@@ -223,7 +223,7 @@ static RESULT rjv3_process_success(struct _packet_plugin* this, ETH_EAP_FRAME* f
             /* This requires fine-grained control of authentication progress,
              * so we can not use the logic of --auth-round.
              */
-            PR_INFO("首次认证成功，正在执行 DHCP 脚本以准备第二次认证");
+            PR_INFO("Auth success, run DHCP script to prepare second auth");
 
             /*
              * PRIV->last_recv_packet == `frame`, but `frame` will be freed
@@ -243,7 +243,7 @@ static RESULT rjv3_process_success(struct _packet_plugin* this, ETH_EAP_FRAME* f
         } else {
             /* Double success */
             rjv3_reset_state(this);
-            PR_INFO("二次认证成功");
+            PR_INFO("Second auth success");
         }
     } else if (PRIV->dhcp_type == DHCP_AFTER_AUTH) {
         /* Run script after one-pass authentication finishes */
@@ -254,7 +254,7 @@ static RESULT rjv3_process_success(struct _packet_plugin* this, ETH_EAP_FRAME* f
         return FAILURE;
     }
 
-    PR_INFO("正定时发送 Keep-Alive 报文以保持在线……");
+    PR_INFO("Send Keep-Alive message to keep online timing...");
     schedule_alarm(1, rjv3_send_keepalive_timed, this);
     return SUCCESS;
 }
@@ -300,7 +300,7 @@ static void rjv3_save_one_prop(void* prop, void* is_mod) {
                         + (is_mod ? 2 : 0) + 1;
     char* prop_str = (char*)malloc(prop_str_len);
     if (prop_str == NULL) {
-        PR_ERRNO("无法保存 --rj-option 选项");
+        PR_ERRNO("Canot save --rj-option option");
         return;
     }
 
@@ -344,28 +344,28 @@ void rjv3_save_config(struct _packet_plugin* this) {
 
 static void packet_plugin_rjv3_print_banner() {
     PR_INFO("\nRJv3 for MiniEAP " VERSION "\n"
-            "V3 校验算法来自 hyrathb@GitHub\n"
+            "V3 cericate verify algorithm from hyrathb@GitHub\n"
             "Hamster Tian, 2016\n\n");
 }
 
 PACKET_PLUGIN* packet_plugin_rjv3_new() {
     PACKET_PLUGIN* this = (PACKET_PLUGIN*)malloc(sizeof(PACKET_PLUGIN));
     if (this == NULL) {
-        PR_ERRNO("RJv3 插件主结构内存分配失败");
+        PR_ERRNO("Cannot alloc memory for RJv3 plugin main struct");
         return NULL;
     }
     memset(this, 0, sizeof(PACKET_PLUGIN));
 
     this->priv = (rjv3_priv*)malloc(sizeof(rjv3_priv));
     if (this->priv == NULL) {
-        PR_ERRNO("RJv3 插件私有结构内存分配失败");
+        PR_ERRNO("Cannot alloc memory for RJv3 plugin private struct");
         free(this);
         return NULL;
     }
     memset(this->priv, 0, sizeof(rjv3_priv));
 
     this->name = "rjv3";
-    this->description = "来自 hyrathb@GitHub 的 Ruijie V3 验证算法";
+    this->description = "From hyrathb@GitHub 's Ruijie V3 verify algorithm";
     this->version = PACKET_PLUGIN_RJV3_VER_STR;
     this->destroy = rjv3_destroy;
     this->process_cmdline_opts = rjv3_process_cmdline_opts;

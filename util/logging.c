@@ -112,7 +112,7 @@ void start_log() {
 			if (g_log_fp == NULL) {
 			    g_log_fp = stdout;
 			    g_dest = LOG_TO_CONSOLE;
-			    PR_ERRNO("日志文件打开失败，将输出至控制台");
+			    PR_ERRNO("Open log file failed, output will redirect to console");
 			}
 			setvbuf(g_log_fp, NULL, _IOLBF, BUFSIZ);
 			break;

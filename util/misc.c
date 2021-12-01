@@ -91,7 +91,7 @@ void gbk2utf8(char* in, size_t inlen, char* out, size_t outlen) {
 #ifdef ENABLE_ICONV
     iconv_t _cd = iconv_open("utf-8", "gbk");
     if (_cd == NULL) {
-        PR_WARN("无法从 iconv 获取编码描述符，服务器消息可能会出现乱码");
+        PR_WARN("Cannot get encoding description from iconv , message from server maybe Garbled");
         memmove(out, in, inlen);
     } else {
         iconv(_cd, &in, &inlen, &out, &outlen);
@@ -137,7 +137,7 @@ char** strarraydup(int count, char* array[]) {
 
     char** _ret = (char**)malloc(count * sizeof(char*));
     if (_ret == NULL) {
-        PR_ERR("无法为命令行选项创建缓冲区");
+        PR_ERR("Cannot create buffer for command line options");
         return NULL;
     }
 

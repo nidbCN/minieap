@@ -21,14 +21,14 @@ RESULT pid_lock_init(const char* pidfile) {
     }
 
     if (strcmp(pidfile, PID_FILE_NONE) == 0) {
-        PR_WARN("PID 检查已禁用，请确保一个接口上只有一个认证进程")
+        PR_WARN("PID check has disabled, please make sure only on process each interface")
         pid_lock_fd = -1;
         return SUCCESS;
     }
-
+ 
     pid_lock_fd = open(pidfile, O_RDWR | O_CREAT, 0644);
     if (pid_lock_fd < 0) {
-        PR_ERRNO("无法打开 PID 文件");
+        PR_ERRNO("Cannot open PID file");
         return FAILURE;
     }
     return SUCCESS;
@@ -40,24 +40,24 @@ static RESULT pid_lock_handle_multiple_instance() {
     char readbuf[PID_STRING_BUFFER_SIZE]; // 12 is big enough to hold PID number
 
     if (read(pid_lock_fd, readbuf, PID_STRING_BUFFER_SIZE) < 0 || readbuf[0] == '\0') {
-        PR_ERRNO("已有另一个 MiniEAP 进程正在运行但 PID 未知，请手动结束其他 MiniEAP 进程");
+        PR_ERRNO("Another MiniEAP process is running but PID is unknow, please kill another MiniEAP process");
         return FAILURE;
     } else {
         int pid = atoi(readbuf);
         switch (get_program_config()->kill_type) {
             case KILL_NONE:
-                PR_ERR("已有另一个 MiniEAP 进程正在运行，PID 为 %d", pid);
+                PR_ERR("Another MiniEAP process is running, PID %d", pid);
                 return FAILURE;
             case KILL_ONLY:
-                PR_ERR("已有另一个 MiniEAP 进程正在运行，PID 为 %d，即将发送终止信号并退出……", pid);
+                PR_ERR("Another MiniEAP process is running, PID %d, send termination signal and exit...", pid);
                 kill(pid, SIGTERM);
                 return FAILURE;
             case KILL_AND_START:
-                PR_WARN("已有另一个 MiniEAP 进程正在运行，PID 为 %d，将在发送终止信号后继续……", pid);
+                PR_WARN("Another MiniEAP process is running, PID %d, send termination signal and continue...", pid);
                 kill(pid, SIGTERM);
                 return SUCCESS;
             default:
-                PR_ERR("-k 参数未知");
+                PR_ERR("-k unknow parameter");
                 return FAILURE;
         }
     }
@@ -65,7 +65,7 @@ static RESULT pid_lock_handle_multiple_instance() {
 
 RESULT pid_lock_save_pid() {
     if (pid_lock_fd == 0) {
-        PR_WARN("PID 文件尚未初始化");
+        PR_WARN("PID file have not be initialized");
         return FAILURE;
     } else if (pid_lock_fd < 0) {
         // User disabled pid lock
@@ -77,7 +77,7 @@ RESULT pid_lock_save_pid() {
     my_itoa(getpid(), writebuf, 10);
 
     if (write(pid_lock_fd, writebuf, strnlen(writebuf, PID_STRING_BUFFER_SIZE)) < 0) {
-        PR_ERRNO("无法将 PID 保存到 PID 文件");
+        PR_ERRNO("Cannot save PID to PID file");
         return FAILURE;
     }
 
@@ -86,7 +86,7 @@ RESULT pid_lock_save_pid() {
 
 RESULT pid_lock_lock() {
     if (pid_lock_fd == 0) {
-        PR_WARN("PID 文件尚未初始化");
+        PR_WARN("PID file have not be initialized");
         return FAILURE;
     } else if (pid_lock_fd < 0) {
         // User disabled pid lock
@@ -102,7 +102,7 @@ RESULT pid_lock_lock() {
                 return FAILURE;
             } // Continue if handled
         } else {
-            PR_ERRNO("无法对 PID 文件加锁");
+            PR_ERRNO("Cannot lock PID file");
             return FAILURE;
         }
     }
@@ -117,7 +117,7 @@ RESULT pid_lock_destroy() {
 
     close(pid_lock_fd); // Unlocks the file simultaneously
     if (unlink(get_program_config()->pidfile) < 0) {
-        PR_WARN("无法删除 PID 文件");
+        PR_WARN("Cannot delete PID file");
     }
     return SUCCESS;
 }

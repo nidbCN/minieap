@@ -115,11 +115,11 @@ static RESULT state_mach_send_identity_response(ETH_EAP_FRAME* request) {
     _response.content = _buf;
 
     if (IS_FAIL(packet_plugin_prepare_frame(&_response))) {
-        PR_ERR("插件在准备发送 Response-Identity 包时出现错误");
+        PR_ERR("An error occurred when preparing send Response-Identity package");
         return FAILURE;
     }
     if (IS_FAIL(_if_impl->send_frame(_if_impl, &_response))) {
-        PR_ERR("发送 Response-Identity 包时出现错误");
+        PR_ERR("An error occurred when sending Response-Identity package");
         return FAILURE;
     }
     return SUCCESS;
@@ -143,11 +143,11 @@ static RESULT state_mach_send_challenge_response(ETH_EAP_FRAME* request) {
     _response.content = _buf;
 
     if (IS_FAIL(packet_plugin_prepare_frame(&_response))) {
-        PR_ERR("插件在准备发送 Response-MD5-Challenge 包时出现错误");
+        PR_ERR("An error occurred when plugin preparing send Response-MD5-Challenge package");
         return FAILURE;
     }
     if (IS_FAIL(_if_impl->send_frame(_if_impl, &_response))) {
-        PR_ERR("发送 Response-MD5-Challenge 包时出现错误");
+        PR_ERR("An error occurred when sending Response-MD5-Challenge package");
         return FAILURE;
     }
     return SUCCESS;
@@ -168,11 +168,11 @@ static RESULT state_mach_send_eapol_simple(EAPOL_TYPE eapol_type) {
     _response.content = _buf;
 
     if (IS_FAIL(packet_plugin_prepare_frame(&_response))) {
-        PR_ERR("插件在准备发送 %s 包时出现错误", str_eapol_type(eapol_type));
+        PR_ERR("An error occurred when plugin preparing send %s package", str_eapol_type(eapol_type));
         return FAILURE;
     }
     if (IS_FAIL(_if_impl->send_frame(_if_impl, &_response))) {
-        PR_ERR("发送 %s 包时出现错误", str_eapol_type(eapol_type));
+        PR_ERR("An error occurred when sending %s package", str_eapol_type(eapol_type));
         return FAILURE;
     }
     return SUCCESS;
@@ -181,11 +181,11 @@ static RESULT state_mach_send_eapol_simple(EAPOL_TYPE eapol_type) {
 static RESULT state_mach_process_success(ETH_EAP_FRAME* frame) {
     PROG_CONFIG* _cfg = get_program_config();
     if (PRIV->auth_round == _cfg->auth_round) {
-        PR_INFO("认证成功");
+        PR_INFO("Authenticate success");
         eap_state_machine_reset(); // Prepare for further use (e.g. re-auth after offline)
         return SUCCESS;
     } else {
-        PR_INFO("第 %d 次认证成功，正在执行下一次认证", PRIV->auth_round);
+        PR_INFO("Authenticate success in %d times, execute next authentication", PRIV->auth_round);
         PRIV->fail_count = 0;
         packet_plugin_set_auth_round(++PRIV->auth_round);
         switch_to_state(EAP_STATE_START_SENT, frame); // Do not restart_auth or reset to keep auth_round
@@ -204,19 +204,19 @@ static RESULT state_mach_process_failure(ETH_EAP_FRAME* frame) {
         /* Server forced us offline, not auth failing */
         if (_cfg->restart_on_logoff) {
             /* Wait for this state transition to FAILURE finish */
-            PR_WARN("认证掉线，稍后将重新开始认证……");
+            PR_WARN("Authentication offline, re-auth later...");
             schedule_alarm(1, restart_auth, NULL);
         } else {
-            PR_ERR("认证掉线，正在退出……");
+            PR_ERR("Authentication offline, exit...");
             exit(EXIT_FAILURE);
         }
     } else {
         /* Fail during auth */
         if (++PRIV->fail_count == _cfg->max_failures) {
-            PR_ERR("认证失败 %d 次，已达到指定次数，正在退出……", PRIV->fail_count);
+            PR_ERR("Authentication failed %d times, reach max value, exit...", PRIV->fail_count);
             exit(EXIT_FAILURE);
         } else {
-            PR_WARN("认证失败 %d 次，将在 %d 秒或服务器请求后重试……", PRIV->fail_count, _cfg->wait_after_fail_secs);
+            PR_WARN("Authentication failed %d times, re-auth after %d seconds or recive server message...", PRIV->fail_count, _cfg->wait_after_fail_secs);
             schedule_alarm(_cfg->wait_after_fail_secs, restart_auth, NULL);
         }
     }
@@ -300,7 +300,7 @@ static void disable_state_watchdog() {
  */
 static RESULT trans_to_preparing(ETH_EAP_FRAME* frame) {
     PR_INFO("========================");
-    PR_INFO("MiniEAP " VERSION "已启动");
+    PR_INFO("MiniEAP " VERSION "have launched");
     IF_IMPL* _if_impl = get_if_impl();
     RESULT ret = switch_to_state(EAP_STATE_START_SENT, frame);
     _if_impl->start_capture(_if_impl); // Blocking...
@@ -308,17 +308,17 @@ static RESULT trans_to_preparing(ETH_EAP_FRAME* frame) {
 }
 
 static RESULT trans_to_start_sent(ETH_EAP_FRAME* frame) {
-    PR_INFO("正在查找认证服务器");
+    PR_INFO("Searching auth server");
     return state_mach_send_eapol_simple(EAPOL_START);
 }
 
 static RESULT trans_to_identity_sent(ETH_EAP_FRAME* frame) {
-    PR_INFO("正在回应用户名请求");
+    PR_INFO("Response username request");
     return state_mach_send_identity_response(frame);
 }
 
 static RESULT trans_to_challenge_sent(ETH_EAP_FRAME* frame) {
-    PR_INFO("正在回应密码请求");
+    PR_INFO("Response password request");
     return state_mach_send_challenge_response(frame);
 }
 
@@ -347,7 +347,7 @@ RESULT switch_to_state(EAP_STATE state, ETH_EAP_FRAME* frame) {
         PROG_CONFIG* _cfg = get_program_config();
         PRIV->state_last_count++;
         if (PRIV->state_last_count == _cfg->max_retries) {
-            PR_ERR("在 %d 状态已经停留了 %d 次，达到指定次数，正在退出……", PRIV->state, _cfg->max_retries);
+            PR_ERR("Stop %d times in status %d, reach max value, exit...", _cfg->max_retries, PRIV->state);
             exit(EXIT_FAILURE);
         }
     } else {
@@ -370,6 +370,6 @@ RESULT switch_to_state(EAP_STATE state, ETH_EAP_FRAME* frame) {
             return SUCCESS;
         }
     }
-    PR_WARN("%d 状态未定义");
+    PR_WARN("Status %d undefined");
     return SUCCESS;
 }

@@ -175,7 +175,7 @@ static void rjv3_set_hdd_serial(uint8_t* serial_buf, char* fake_serial) {
     }
 
 info_err:
-    PR_ERRNO("无法从 /etc/mtab 获取根分区挂载设备信息，请使用 --fake-serial 选项手动指定硬盘序列号");
+    PR_ERRNO("Cannot get mounted device info from /etc/mtab , please use --fake-serial option to specify device id");
 close_return:
     if (_fp != NULL) fclose(_fp);
     if (_root_dev) free(_root_dev);

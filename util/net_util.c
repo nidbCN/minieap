@@ -42,7 +42,7 @@ IP_ADDR* find_ip_with_family(LIST_ELEMENT* list, short family) {
 RESULT obtain_iface_mac(const char* ifname, uint8_t* adr_buf) {
     struct ifaddrs *ifaddrs, *if_curr;
     if (getifaddrs(&ifaddrs) < 0) {
-        PR_ERRNO("通过 getifaddrs 获取 MAC 地址失败");
+        PR_ERRNO("Get MAC address via getifaddrs failed");
         return FAILURE;
     }
 
@@ -68,7 +68,7 @@ RESULT obtain_iface_ip_mask(const char* ifname, LIST_ELEMENT** list) {
     struct ifaddrs *ifaddrs, *if_curr;
     IP_ADDR *addr;
     if (getifaddrs(&ifaddrs) < 0) {
-        PR_ERRNO("通过 getifaddrs 获取 IP 地址失败");
+        PR_ERRNO("Get IP address via getifaddrs failed");
         return FAILURE;
     }
 
@@ -106,7 +106,7 @@ RESULT obtain_dns_list(LIST_ELEMENT** list) {
     char* _line_buf_1;
 
     if (_fp == NULL) {
-        PR_ERRNO("无法从 /etc/resolv.conf 获取 DNS 信息");
+        PR_ERRNO("Get DNS infomation via /etc/resolv.conf failed");
         return FAILURE;
     }
 
@@ -143,7 +143,7 @@ static int read_from_netlink_socket(int sockfd, uint8_t *buf, int seq, int pid) 
     do {
         /* Recieve response from the kernel */
         if ((readLen = recv(sockfd, buf, NL_BUFSIZE - msgLen, 0)) < 0) {
-            PR_ERRNO("无法从 NETLINK 接收数据");
+            PR_ERRNO("Recive data from NETLINK failed");
             return -1;
         }
 
@@ -154,7 +154,7 @@ static int read_from_netlink_socket(int sockfd, uint8_t *buf, int seq, int pid) 
             || (nlHdr->nlmsg_type == NLMSG_ERROR)) {
             struct nlmsgerr* _err = (struct nlmsgerr*) NLMSG_DATA(nlHdr);
             if (_err->error != 0) {
-                PR_WARN("NETLINK 报告了一个错误 (%x)", _err->error);
+                PR_WARN("NETLINK report a exception (%x)", _err->error);
                 return msgLen - readLen;
             }
         }
@@ -225,7 +225,7 @@ RESULT obtain_iface_ipv4_gateway(const char* ifname, uint8_t* buf) {
     int sockfd, len, msg_seq = 0, rand_pid = rand() % 65536;
 
     if ((sockfd = socket(PF_NETLINK, SOCK_DGRAM, NETLINK_ROUTE)) < 0) {
-        PR_ERRNO("NETLINK 套接字打开失败");
+        PR_ERRNO("Open NETLINK socket failed");
         return FAILURE;
     }
     struct sockaddr_nl nl_addr;
@@ -252,7 +252,7 @@ RESULT obtain_iface_ipv4_gateway(const char* ifname, uint8_t* buf) {
 
     /* Send the request */
     if (send(sockfd, nl_msg, nl_msg->nlmsg_len, 0) < 0) {
-        PR_ERRNO("无法向 NETLINK 发送请求");
+        PR_ERRNO("Request NETLINK failed");
         goto err;
     }
 

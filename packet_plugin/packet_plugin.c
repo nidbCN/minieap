@@ -121,13 +121,13 @@ void packet_plugin_load_default_params() {
 void packet_plugin_print_cmdline_help() {
     LIST_ELEMENT *plugin_info = g_packet_plugin_list;
     if (g_packet_plugin_list == NULL) return;
-    PR_RAW("\n以下是可用的数据包修改插件及其选项：\n");
+    PR_RAW("\nPackage modifier plugins and options\n");
     do {
-        PR_RAW("\n    插件名称： \033[1m%s\033[0m (%s)\n", PLUGIN->name, PLUGIN->description);
+        PR_RAW("\n    Plugin name: \033[1m%s\033[0m (%s)\n", PLUGIN->name, PLUGIN->description);
         if (PLUGIN->print_cmdline_help) {
             PLUGIN->print_cmdline_help(PLUGIN);
         } else {
-            PR_RAW("\t此插件无选项可用\n");
+            PR_RAW("\tNo option for this plugin\n");
         }
     } while ((plugin_info = plugin_info->next));
 }

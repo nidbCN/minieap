@@ -101,7 +101,7 @@ int append_rjv3_prop_to_buffer(RJ_PROP* prop, uint8_t* buf, int buflen) {
     int _full_len = sizeof(RJ_PROP_HEADER1)+ sizeof(RJ_PROP_HEADER2) + _content_len;
 
     if (buflen < _full_len) {
-        PR_ERR("No buffer left, cannot append field 缓冲空间不足，无法追加字段");
+        PR_ERR("No buffer left, cannot append field");
         return -1;
     }
 
@@ -177,7 +177,7 @@ static inline int rjv3_prop_length_field_ok(RJ_PROP *prop) {
 
     /* header2.len needs to cover itself at least. If it's not, we won't be able to trust it. */
     if (prop->header2.len < sizeof(RJ_PROP_HEADER2) - sizeof(prop->header2.magic)) {
-        PR_DBG("类型为 0x%02hhx 的字段中，长度信息未涵盖头部自身", prop->header2.type);
+        PR_DBG("Length infomation not contained header in field type 0x%02hhx", prop->header2.type);
         return 0;
     }
 
@@ -215,7 +215,7 @@ RESULT parse_rjv3_buf_to_prop_list(LIST_ELEMENT** list, uint8_t* buf, int buflen
                                  _content_len);
                 _read_len += _content_len;
             } else {
-                PR_DBG("字段格式错误，未发现特征值（偏移量 0x%x）", _read_len);
+                PR_DBG("Field format error, eigenvalues not found (offset 0x%x)", _read_len);
                 goto err;
             }
         }
@@ -239,7 +239,7 @@ RESULT parse_rjv3_buf_to_prop_list(LIST_ELEMENT** list, uint8_t* buf, int buflen
                                                               buf + _read_len, buflen - _read_len);
                     _content_len = _next_magic ? (_next_magic - (buf + _read_len) - sizeof(RJ_PROP_HEADER1))
                                                : buflen - _read_len;
-                    PR_WARN("解析数据包时发现未知 header_type: %hhu", _tmp_prop->header1.header_type);
+                    PR_WARN("Unknow header_type: %hhu when parse data package", _tmp_prop->header1.header_type);
                 }
 
                 append_rjv3_prop(list,
@@ -248,7 +248,7 @@ RESULT parse_rjv3_buf_to_prop_list(LIST_ELEMENT** list, uint8_t* buf, int buflen
                                  _content_len);
                 _read_len += _content_len;
             } else {
-                PR_DBG("字段格式错误，未发现特征值（偏移量 0x%x）", _read_len);
+                PR_DBG("Field format error, eigenvalues not found (offset 0x%x)", _read_len);
                 goto err;
             }
         }
